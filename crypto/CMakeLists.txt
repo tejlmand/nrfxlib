@@ -56,6 +56,7 @@ if (CONFIG_CC310_BACKEND)
                         "${NRF_CC310_LIB}"
   )
   target_include_directories(${IMAGE}mbedcrypto_cc310 INTERFACE
+                             "${NRF_CC310_BASE}/include"
                              "${NRF_CC310_BASE}/include/mbedtls")
   target_link_libraries(${IMAGE}mbedcrypto_cc310 INTERFACE ${IMAGE}mbedcrypto_vanilla)
   if (NOT CONFIG_NRF_CRYPTO_BACKEND_COMBINATION_0)
