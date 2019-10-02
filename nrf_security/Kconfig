@@ -64,7 +64,7 @@ comment "Backend Selection"
 config CC310_BACKEND
 	bool "Use cc310 backend"
 	default y
-	depends on SOC_NRF52840 || SOC_NRF9160
+	depends on SOC_NRF52840 || (SOC_NRF9160 && TRUSTED_EXECUTION_SECURE)
 	select NRF_CRYPTO_BACKEND_COMBINATION_0 if MBEDTLS_VANILLA_BACKEND
 	select NRF_CC310_PLATFORM
 	help
@@ -77,7 +77,7 @@ config CC310_INTERRUPTS_BACKEND
 
 config MBEDTLS_VANILLA_BACKEND
 	bool "Use mbed TLS backend"
-	default y if !(SOC_NRF52840 || SOC_NRF9160)
+	default y if !(SOC_NRF52840 || (SOC_NRF9160 && TRUSTED_EXECUTION_SECURE))
 	help
 	  Enable mbed TLS vanilla backend
 
