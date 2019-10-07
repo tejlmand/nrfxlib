@@ -129,26 +129,25 @@ config MBEDTLS_CIPHER_AES_256_OFB_C
 
 comment "Configuration section"
 
-menu "AES   - Advanced Encryption Standard"
-	depends on CC310_BACKEND || MBEDTLS_VANILLA_BACKEND
-
-config MBEDTLS_AES_C
+menuconfig MBEDTLS_AES_C
 	bool
-	prompt "AES block cipher, including ECB - Electronic Code Book mode"
-	default y
+	prompt "AES   - Advanced Encryption Standard"
 	depends on CC310_BACKEND || MBEDTLS_VANILLA_BACKEND
-	depends on !NRF_CRYPTO_BACKEND_COMBINATION_0
-	select MBEDTLS_CIPHER_AES_256_ECB_C if MBEDTLS_VANILLA_BACKEND
+	default y
 	help
-	  Enable the AES block cipher, this setting is required for other AES
-	  cipher modes to be available.
-	  MBEDTLS_AES_C setting in mbed TLS config file.
+	  This setting will enable AES block cipher, including ECB - Electronic Code Book.
+	  Enabling AES will provide a sub-menu which allows for fine grained
+	  configuration of specific cipher support.
+	  Corresponds to MBEDTLS_AES_C setting in mbed TLS config file.
+
+if MBEDTLS_AES_C
 
 config GLUE_MBEDTLS_AES_C
 	bool
 
-menu "AES block cipher common, including ECB - Electronic Code Book mode"
-	depends on NRF_CRYPTO_BACKEND_COMBINATION_0
+if NRF_CRYPTO_BACKEND_COMBINATION_0
+
+comment "General AES Backend Selection"
 
 config CC310_MBEDTLS_AES_C
 	bool "cc310 (AES-128)"
@@ -162,7 +161,9 @@ config VANILLA_MBEDTLS_AES_C
 	select NRF_CRYPTO_GLUE_LIBRARY if CC310_MBEDTLS_AES_C
 	select MBEDTLS_CIPHER_AES_256_ECB_C
 
-endmenu # AES block cipher common, including ECB - Electronic Code Book mode
+comment "Cipher Selection"
+
+endif # NRF_CRYPTO_BACKEND_COMBINATION_0
 
 config GLUE_MBEDTLS_CIPHER_MODE_CBC
 	bool
@@ -175,7 +176,7 @@ config VANILLA_MBEDTLS_CIPHER_MODE_CBC
 
 config MBEDTLS_CIPHER_MODE_CBC
 	bool "AES-CBC - AES Cipher Block Chaining mode"
-	depends on MBEDTLS_AES_C || VANILLA_MBEDTLS_AES_C || CC310_MBEDTLS_AES_C
+	depends on (MBEDTLS_AES_C && !NRF_CRYPTO_BACKEND_COMBINATION_0) || (VANILLA_MBEDTLS_AES_C || CC310_MBEDTLS_AES_C)
 	default y
 	select MBEDTLS_CIPHER_AES_256_CBC_C if MBEDTLS_VANILLA_BACKEND && !NRF_CRYPTO_BACKEND_COMBINATION_0
 	select MBEDTLS_CIPHER_AES_256_CBC_C if GLUE_MBEDTLS_AES_C
@@ -187,7 +188,7 @@ config MBEDTLS_CIPHER_MODE_CBC
 	  MBEDTLS_CIPHER_MODE_CBC setting in mbed TLS config file.
 
 menu "CBC cipher padding modes"
-	depends on MBEDTLS_CIPHER_MODE_CBC && (MBEDTLS_AES_C || CC310_MBEDTLS_AES_C || VANILLA_MBEDTLS_AES_C)
+	depends on MBEDTLS_CIPHER_MODE_CBC
 
 config MBEDTLS_CIPHER_PADDING_PKCS7
 	bool
@@ -234,7 +235,7 @@ config VANILLA_MBEDTLS_CIPHER_MODE_CTR
 
 config MBEDTLS_CIPHER_MODE_CTR
 	bool "AES-CTR - AES Counter Block Cipher mode"
-	depends on MBEDTLS_AES_C || VANILLA_MBEDTLS_AES_C || CC310_MBEDTLS_AES_C
+	depends on (MBEDTLS_AES_C && !NRF_CRYPTO_BACKEND_COMBINATION_0) || (VANILLA_MBEDTLS_AES_C || CC310_MBEDTLS_AES_C)
 	default y
 	select MBEDTLS_CIPHER_AES_256_CTR_C if MBEDTLS_VANILLA_BACKEND && !NRF_CRYPTO_BACKEND_COMBINATION_0
 	select MBEDTLS_CIPHER_AES_256_CTR_C if GLUE_MBEDTLS_AES_C
@@ -256,7 +257,7 @@ config VANILLA_MBEDTLS_CIPHER_MODE_CFB
 
 config MBEDTLS_CIPHER_MODE_CFB
 	bool "AES-CFB - AES Cipher Feedback mode"
-	depends on MBEDTLS_AES_C || VANILLA_MBEDTLS_AES_C || CC310_MBEDTLS_AES_C
+	depends on (MBEDTLS_AES_C && !NRF_CRYPTO_BACKEND_COMBINATION_0) || (VANILLA_MBEDTLS_AES_C || CC310_MBEDTLS_AES_C)
 	default y
 	select MBEDTLS_CIPHER_AES_256_CFB_C if GLUE_MBEDTLS_AES_C
 	select GLUE_MBEDTLS_CIPHER_MODE_CFB if GLUE_MBEDTLS_AES_C
@@ -277,7 +278,7 @@ config VANILLA_MBEDTLS_CIPHER_MODE_OFB
 
 config MBEDTLS_CIPHER_MODE_OFB
 	bool "AES-OFB - AES Output Feedback mode"
-	depends on MBEDTLS_AES_C || VANILLA_MBEDTLS_AES_C || CC310_MBEDTLS_AES_C
+	depends on (MBEDTLS_AES_C && !NRF_CRYPTO_BACKEND_COMBINATION_0) || (VANILLA_MBEDTLS_AES_C || CC310_MBEDTLS_AES_C)
 	default y
 	select MBEDTLS_CIPHER_AES_256_OFB_C if GLUE_MBEDTLS_AES_C
 	select GLUE_MBEDTLS_CIPHER_MODE_OFB if GLUE_MBEDTLS_AES_C
@@ -290,8 +291,8 @@ config MBEDTLS_CIPHER_MODE_OFB
 config MBEDTLS_CIPHER_MODE_XTS
 	bool "AES-XTS - AES Xor-encrypt-xor with ciphertext stealing mode"
 	default y
-	depends on MBEDTLS_VANILLA_BACKEND && (MBEDTLS_AES_C || VANILLA_MBEDTLS_AES_C)
-	depends on !CC310_BACKEND
+	depends on (MBEDTLS_AES_C && MBEDTLS_VANILLA_BACKEND && !NRF_CRYPTO_BACKEND_COMBINATION_0) || (VANILLA_MBEDTLS_AES_C)
+	depends on !CC310_MBEDTLS_AES_C
 	help
 	  Enable the AES Xor-encrypt-xor with ciphertext stealing mode (XTS) mode,
 	  MBEDTLS_CIPHER_MODE_XTS setting in mbed TLS config file.
@@ -303,7 +304,7 @@ config MBEDTLS_CMAC_C
 	bool
 	prompt "AES-CMAC - AES Cipher-based Message Authentication Code mode for block ciphers"
 	default y
-	depends on (CC310_BACKEND || MBEDTLS_VANILLA_BACKEND)
+	depends on (MBEDTLS_AES_C && !NRF_CRYPTO_BACKEND_COMBINATION_0) || (VANILLA_MBEDTLS_AES_C || CC310_MBEDTLS_AES_C)
 	select MBEDTLS_AES_256_CMAC_C if MBEDTLS_VANILLA_BACKEND && !NRF_CRYPTO_BACKEND_COMBINATION_0
 	help
 	  Enable the CMAC module.
@@ -328,7 +329,7 @@ config VANILLA_MBEDTLS_CMAC_C
 
 endchoice
 
-endmenu # AES   - Advanced Encryption Standard
+endif # MBEDTLS_AES_C
 
 menu "AEAD  - Authenticated Encryption with Associated Data"
 	depends on CC310_BACKEND || MBEDTLS_VANILLA_BACKEND
@@ -493,17 +494,23 @@ config VANILLA_MBEDTLS_DHM_C
 	  MBEDTLS_DHM_C setting in mbed TLS config file.
 endmenu
 
-menu "ECC - Elliptic Curve Cryptography"
-	depends on CC310_BACKEND || MBEDTLS_VANILLA_BACKEND
-
-config MBEDTLS_ECP_C
+menuconfig MBEDTLS_ECP_C
 	bool
-	prompt "ECP - Eliptic Curve Cryptography low-level APIs"
+	prompt "ECC - Eliptic Curve Cryptography"
 	depends on (CC310_BACKEND || MBEDTLS_VANILLA_BACKEND)
 	default y
 	help
 	  Enable low level APIs for elliptic curves for
 	  additional functionality (besides ECDH and ECDSA)
+	  Enabling ECC will provide a sub-menu which allows for fine grained
+	  configuration of ECC based features and specific cipher support.
+	  Corresponds to MBEDTLS_ECP_C setting in mbed TLS config file.
+
+if MBEDTLS_ECP_C
+
+if NRF_CRYPTO_BACKEND_COMBINATION_0
+
+comment "General ECC Backend Selection"
 
 choice
 	bool
@@ -518,6 +525,10 @@ config VANILLA_MBEDTLS_ECP_C
 	bool "mbed TLS vanilla" if MBEDTLS_VANILLA_BACKEND
 
 endchoice
+
+comment "ECC Feature Selection"
+
+endif # NRF_CRYPTO_BACKEND_COMBINATION_0
 
 config MBEDTLS_ECDH_C
 	bool
@@ -664,12 +675,10 @@ config MBEDTLS_ECP_DP_CURVE448_ENABLED
 
 endmenu # ECC curves
 
-endmenu # ECC - Elliptic Curve Cryptography
+endif # MBEDTLS_ECP_C
 
-menu "RSA   - Rivest–Shamir–Adleman cryptosystem"
-	depends on (CC310_BACKEND || MBEDTLS_VANILLA_BACKEND)
 
-config MBEDTLS_RSA_C
+menuconfig MBEDTLS_RSA_C
 	bool
 	prompt "RSA   - Rivest–Shamir–Adleman cryptosystem"
 	default y
@@ -678,9 +687,15 @@ config MBEDTLS_RSA_C
 	  Enable RSA cryptosystem support.
 	  MBEDTLS_RSA_C setting in mbed TLS config file.
 
+if MBEDTLS_RSA_C
+
+if NRF_CRYPTO_BACKEND_COMBINATION_0
+
+comment "RSA Backend Selection"
+
 choice
 	bool
-	prompt "RSA backend selection" if MBEDTLS_RSA_C
+	prompt "Backend selection" if MBEDTLS_RSA_C
 	depends on NRF_CRYPTO_BACKEND_COMBINATION_0
 	depends on MBEDTLS_RSA_C
 	default CC310_MBEDTLS_RSA_C
@@ -693,6 +708,10 @@ config VANILLA_MBEDTLS_RSA_C
 
 endchoice
 
+comment "RSA Encoding Selection"
+
+endif # NRF_CRYPTO_BACKEND_COMBINATION_0
+
 config MBEDTLS_PKCS1_V15
 	bool "PKCS1 v1.5 support"
 	depends on MBEDTLS_RSA_C
@@ -702,7 +721,7 @@ config MBEDTLS_PKCS1_V21
 	depends on MBEDTLS_RSA_C
 	default y
 
-endmenu # RSA   - Rivest–Shamir–Adleman cryptosystem
+endif # MBEDTLS_RSA_C
 
 menu "SHA   - Secure Hash Algorithm"
 	depends on (CC310_BACKEND || MBEDTLS_VANILLA_BACKEND)
