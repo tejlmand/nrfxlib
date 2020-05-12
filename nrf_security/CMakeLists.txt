@@ -5,8 +5,6 @@
 #
 set(NRF_SECURITY_ROOT ${CMAKE_CURRENT_LIST_DIR})
 
-set(NRF_CC310_MBEDCRYPTO_INCLUDE_PATH "${NRFXLIB_DIR}/crypto/nrf_cc310_mbedcrypto/include/mbedtls")
-
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/nrf_security_debug.cmake)
 if(CONFIG_GENERATE_MBEDTLS_CFG_FILE)
   include(${CMAKE_CURRENT_LIST_DIR}/cmake/kconfig_mbedtls_configure.cmake)

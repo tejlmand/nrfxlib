@@ -82,8 +82,10 @@ if (CONFIG_CC310_BACKEND)
                     "(${NRF_CC310_LIB} doesn't exist.)")
   endif()
   add_library(mbedcrypto_cc310 STATIC IMPORTED GLOBAL)
-  set_target_properties(mbedcrypto_cc310 PROPERTIES IMPORTED_LOCATION
-                        "${NRF_CC310_LIB}")
+  set_target_properties(mbedcrypto_cc310 PROPERTIES
+                        IMPORTED_LOCATION "${NRF_CC310_LIB}"
+			NRF_CC310_MBEDCRYPTO_INCLUDE_PATH "${NRF_CC310_BASE}/include/mbedtls"
+)
   target_include_directories(mbedcrypto_cc310 INTERFACE
                              "${NRF_CC310_BASE}/include"
                              "${NRF_CC310_BASE}/include/mbedtls")

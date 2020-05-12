@@ -342,6 +342,11 @@ set(generated_include_path
 # Copy the correct alt include files to use for libraries
 # from CC310 folder if in use
 #
+
+get_target_property(NRF_CC310_MBEDCRYPTO_INCLUDE_PATH
+                    mbedcrypto_cc310 CC310_MBEDTLS_INCLUDE_DIRECTORY
+)
+
 configure_file_ifdef(CC310_MBEDTLS_AES_C
   ${NRF_CC310_MBEDCRYPTO_INCLUDE_PATH}/aes_alt.h
   ${generated_include_path}/aes_alt.h
