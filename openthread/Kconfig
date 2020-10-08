@@ -108,11 +108,10 @@ config OPENTHREAD_USER_CUSTOM_LIBRARY
 
 endchoice
 
-config OPENTHREAD_STRIP_LIBRARIES_BEFORE_INSTALL
-	bool "Strip OpenThread libraries before installation"
-	default y
+config OPENTHREAD_BUILD_OUTPUT_STRIPPED
+	bool "Strip OpenThread libraries"
 	help
-	  Valid for custom target: install_openthread_libraries.
+	  Build a stripped library versions of OpenThread in the build directory.
 
 endmenu # "OpenThread"
 

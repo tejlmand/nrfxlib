@@ -21,35 +21,35 @@ if(CONFIG_OPENTHREAD_SOURCES)
   set(OPENTHREAD_SYSTEM_H "${ZEPHYR_OPENTHREAD_MODULE_DIR}/examples/platforms/openthread-system.h")
   set(NRF_SECURITY_MBEDTLS_CONFIG_FILE ${CMAKE_CURRENT_BINARY_DIR}/../nrf_security/include/${CONFIG_MBEDTLS_CFG_FILE})
 
-  if(CONFIG_OPENTHREAD_STRIP_LIBRARIES_BEFORE_INSTALL)
-    list(APPEND INSTALL_COMMANDS
-      COMMAND ${CMAKE_COMMAND} -E echo "Stripping OpenThread libraries and installing into: ${OPENTHREAD_DST_DIR}"
-      COMMAND ${CMAKE_COMMAND} -E make_directory "${OPENTHREAD_DST_DIR}"
-    )
+  if(CONFIG_OPENTHREAD_BUILD_OUTPUT_STRIPPED)
     foreach(target openthread-ftd openthread-mtd openthread-radio openthread-cli-ftd openthread-cli-mtd openthread-ncp-ftd openthread-ncp-mtd openthread-rcp)
-      list(APPEND INSTALL_COMMANDS
-        COMMAND $<TARGET_PROPERTY:bintools,strip_command>
-                $<TARGET_PROPERTY:bintools,strip_flag>
-                $<TARGET_PROPERTY:bintools,strip_flag_debug>
-                $<TARGET_PROPERTY:bintools,strip_flag_infile>$<TARGET_FILE:${target}>
-                $<TARGET_PROPERTY:bintools,strip_flag_outfile>"${OPENTHREAD_DST_DIR}/$<TARGET_FILE_NAME:${target}>"
-                $<TARGET_PROPERTY:bintools,strip_flag_final>
+      list(APPEND OPENTHREAD_STRIP_COMMAND
+           COMMAND $<TARGET_PROPERTY:bintools,strip_command>
+                   $<TARGET_PROPERTY:bintools,strip_flag>
+                   $<TARGET_PROPERTY:bintools,strip_flag_debug>
+                   $<TARGET_PROPERTY:bintools,strip_flag_infile>$<TARGET_FILE:${target}>
+                   $<TARGET_PROPERTY:bintools,strip_flag_outfile>$<TARGET_FILE:${target}>.strip
+                   $<TARGET_PROPERTY:bintools,strip_flag_final>
       )
     endforeach()
-  else()
-    list(APPEND INSTALL_COMMANDS
-      COMMAND ${CMAKE_COMMAND} -E echo "Installing OpenThread libraries into: ${OPENTHREAD_DST_DIR}"
-      COMMAND ${CMAKE_COMMAND} -E make_directory "${OPENTHREAD_DST_DIR}"
-      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:openthread-ftd> "${OPENTHREAD_DST_DIR}"
-      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:openthread-mtd> "${OPENTHREAD_DST_DIR}"
-      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:openthread-radio> "${OPENTHREAD_DST_DIR}"
-      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:openthread-cli-ftd> "${OPENTHREAD_DST_DIR}"
-      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:openthread-cli-mtd> "${OPENTHREAD_DST_DIR}"
-      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:openthread-ncp-ftd> "${OPENTHREAD_DST_DIR}"
-      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:openthread-ncp-mtd> "${OPENTHREAD_DST_DIR}"
-      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:openthread-rcp> "${OPENTHREAD_DST_DIR}"
+    add_custom_target(openthread_stripped ALL
+                      ${OPENTHREAD_STRIP_COMMAND}
+                      COMMAND_EXPAND_LISTS
     )
+    set(OPENTHREAD_LIB_INSTALL_POSTFIX ".strip")
   endif()
+  list(APPEND INSTALL_COMMANDS
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing OpenThread libraries into: ${OPENTHREAD_DST_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${OPENTHREAD_DST_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:openthread-ftd>${OPENTHREAD_LIB_INSTALL_POSTFIX}  ${OPENTHREAD_DST_DIR}/$<TARGET_FILE_NAME:openthread-ftd>
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:openthread-mtd>${OPENTHREAD_LIB_INSTALL_POSTFIX}  ${OPENTHREAD_DST_DIR}/$<TARGET_FILE_NAME:openthread-mtd>
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:openthread-radio>${OPENTHREAD_LIB_INSTALL_POSTFIX} ${OPENTHREAD_DST_DIR}/$<TARGET_FILE_NAME:openthread-radio>
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:openthread-cli-ftd>${OPENTHREAD_LIB_INSTALL_POSTFIX} ${OPENTHREAD_DST_DIR}/$<TARGET_FILE_NAME:openthread-cli-ftd>
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:openthread-cli-mtd>${OPENTHREAD_LIB_INSTALL_POSTFIX} ${OPENTHREAD_DST_DIR}/$<TARGET_FILE_NAME:openthread-cli-mtd>
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:openthread-ncp-ftd>${OPENTHREAD_LIB_INSTALL_POSTFIX} ${OPENTHREAD_DST_DIR}/$<TARGET_FILE_NAME:openthread-ncp-ftd>
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:openthread-ncp-mtd>${OPENTHREAD_LIB_INSTALL_POSTFIX} ${OPENTHREAD_DST_DIR}/$<TARGET_FILE_NAME:openthread-ncp-mtd>
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:openthread-rcp>${OPENTHREAD_LIB_INSTALL_POSTFIX} ${OPENTHREAD_DST_DIR}/$<TARGET_FILE_NAME:openthread-rcp>
+  )
 
   list(APPEND INSTALL_COMMANDS
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${OPENTHREAD_HEADERS_DIR} ${OPENTHREAD_HEADERS_DST_DIR}
