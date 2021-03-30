@@ -4,6 +4,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
+add_library(nrf-802154-interface INTERFACE)
+
 add_subdirectory(driver)
 add_subdirectory(sl)
 
